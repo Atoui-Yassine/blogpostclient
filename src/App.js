@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState }  from 'react';
+import { UidContext } from './components/AppContext';
+import Routes from "./components/routes"
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { getUser } from "./actions/user.action";
 
-function App() {
+
+const App = () => {
+ const [uid, setUid] = useState(null);
+ const dispatch = useDispatch();
+  //a chaque compent en controle le token de user 
+  useEffect(() => {
+    const fetchToken = async () => {
+      await axios({
+        method: "get",
+        url: `${process.env.REACT_APP_URL}jwtid`,
+        withCredentials: true,
+      })
+        .then((res) => {
+          setUid(res.data);
+         // console.log(res.data)
+        })
+        .catch((err) => console.log("No token"));
+    };
+    fetchToken();
+
+    if (uid) dispatch(getUser(uid));
+  }, [uid,dispatch]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UidContext.Provider value={uid}>
+       
+       <Routes />
+      
+    </UidContext.Provider>
   );
-}
+};
 
 export default App;
